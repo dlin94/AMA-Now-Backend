@@ -26,10 +26,8 @@ app.get('/', (req, res) => {
 const port = process.env.PORT || 6500;
 app.listen(port, () => {
   const date = new Date();
-  const cron = `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * *`
-  Schedule.scheduleJob(cron, () => {
-    getEvents(conn)
-  });
+  const cron = `${date.getSeconds()} ${date.getMinutes()} * * * *`
+  Schedule.scheduleJob(cron, getEvents);
 });
 
 console.log(`listening on: ${port}`);

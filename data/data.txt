@@ -1,0 +1,57 @@
+Printing values in first dict: 
+0 1580
+5 888
+10 794
+15 593
+20 461
+25 391
+30 240
+35 223
+40 233
+45 225
+50 172
+55 173
+60 193
+65 125
+70 126
+75 127
+80 108
+85 89
+90 63
+95 55
+100 63
+105 66
+110 63
+115 68
+120 69
+125 44
+130 37
+135 40
+140 44
+145 31
+150 34
+155 39
+160 27
+165 28
+170 28
+175 19
+180 433
+
+Printing values in second dict: 
+0 489
+1 308
+2 267
+3 287
+4 229
+5 202
+6 199
+7 191
+8 150
+9 146
+
+Number of comments: 7992
+Median: 21.0 Mean: 49.5676926927
+Std Dev: 80.4352005889
+Counted threads: 185
+Proportion of answers for comments within 5 minutes: 19.77% (1580/7992)
+Proportion of answers for comments within 10 minutes: 30.88% (2468/7992)

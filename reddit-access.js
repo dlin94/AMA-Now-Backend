@@ -3,10 +3,13 @@ import Schedule from 'node-schedule';
 import Event from './models/event-model';
 
 //  https://www.reddit.com/api/v1/authorize?client_id=kPpo2pzRIdkrMw&response_type=code&state=randomstring&redirect_uri=http://127.0.0.1:6500/authorize_callback&duration=permanent&scope=submit identity
-const CLIENT_ID = 'kPpo2pzRIdkrMw'; // TODO: make these env variables
-const CLIENT_SECRET = 'jeUuCI6R2s1O5XfTh5EYvEA-LuM';
-const REDIRECT_URI = 'http://amanow.surge.sh/submit'; //'http://127.0.0.1:8080/submit';
+const CLIENT_ID = process.env.APP_CLIENT_ID || 'kPpo2pzRIdkrMw'; // TODO: make these env variables
+const CLIENT_SECRET = process.env.APP_CLIENT_SECRET || 'jeUuCI6R2s1O5XfTh5EYvEA-LuM';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'http://amanow.surge.sh/submit'; //'http://127.0.0.1:8080/submit';
+const BOT_USER = process.env.BOT_USER || 'amanowbot';
+const BOT_PASS = process.env.BOT_PASS || '283954';
 const HOUR_MS = 3600000;
+
 
 // http://stackoverflow.com/questions/16094545/cron-job-every-5-minutes-starting-from-a-specific-time
 // http://stackoverflow.com/questions/30055595/starting-a-cron-job-at-30-minutes-in-unix?rq=1
@@ -110,8 +113,8 @@ const pmUser = (user, ama, question) => {
     method: 'POST',
     form: {
       grant_type: 'password',
-      username: 'amanowbot', // TODO: env variables!
-      password: '283954'
+      username: BOT_USER, // TODO: env variables!
+      password: BOT_PASS
     },
     headers: {
       'User-Agent': 'confirm-bot-v1 by /u/amanowbot'

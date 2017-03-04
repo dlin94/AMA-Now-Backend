@@ -1,8 +1,8 @@
 import request from 'request';
 import Event from './models/event-model';
 
-const CALENDAR_ID = 'amaverify@gmail.com'
-const API_KEY = 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ';
+const CALENDAR_ID = process.env.CALENDAR_ID || 'amaverify@gmail.com'
+const API_KEY = process.env.API_KEY || 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ';
 
 // https://calendar.google.com/calendar/embed?src=amaverify@gmail.com
 // https://developers.google.com/google-apps/calendar/v3/reference/events/list
@@ -11,7 +11,7 @@ const API_KEY = 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ';
 // DB should be updated once a day. Just drop the DB and repopulate it with data
 // from calendar API call.
 // Might need to deal with timezone offsets... Read events reference and this: http://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
-export const getEvents = (conn) => { // TODO: temporary parameter...probably not needed
+export const getEvents = () => { // TODO: temporary parameter...probably not needed
   const timeMin = (new Date()).toISOString();
   request(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${timeMin}`, {
     method: 'GET'
@@ -49,7 +49,7 @@ export const getEvents = (conn) => { // TODO: temporary parameter...probably not
           }
         });
       }
-      conn.connection.db.dropDatabase(); // TODO: temporary
+      Event.collection.drop(); // TODO: Make sure this ONLY drops the collection and not the database
     }
   });
 }
