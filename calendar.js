@@ -1,5 +1,6 @@
 import request from 'request';
 import Event from './models/event-model';
+import Job from './models/job-model';
 
 const CALENDAR_ID = process.env.CALENDAR_ID || 'amaverify@gmail.com'
 const API_KEY = process.env.API_KEY || 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ';
@@ -25,7 +26,6 @@ export const getEvents = () => { // TODO: temporary parameter...probably not nee
       //console.log(events);
       //console.log(events.length);
       //console.log(response.statusCode);
-      // TODO: Modify so that we're only adding what needs to be added. Also must remove documents, probably in a separate method.
       for (let e of events) {
         const subjects = getSubjects(e.summary);
         Event.find({'people': subjects}).exec((err, ev) => {

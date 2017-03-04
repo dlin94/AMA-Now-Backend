@@ -1,0 +1,113 @@
+TODO: (roughly in order)
+
+-Consider incorporating Redux
+
+-Add descriptions as tags in the backend to search.
+
+-Add in helper popups (like the little question marks on the side) that tell the user how to use.
+
+-The server should check for statusCodes === 200 when making API calls to reddit
+to account for possible errors. The server should tell the user whether or not
+his submission was successful.
+-On submit, the page should be redirected to a confirmation page, which will
+tell the user if scheduling was successful or not, based on the response from the
+server. The confirmation page should have a link back to home page.
+-There should be a schedule table on the side built from the GET request from server.
+Maybe have a countdown timer column.
+-PM user from amanowbot if the post was not found.
+
+
+5. Fix cron to accommodate different times (and maybe check every 30 seconds for an hour)
+Also change amaTimes to be 15 minutes before scheduled times so that it can account for early postings
+
+6. Have a collection for jobs that server can query on startup so that
+scheduled jobs are not lost when server is restarted.
+
+7. Check if server can handle multiple jobs.
+
+8. Refactor code to make it cleaner. Look into using axios for HTTP requests.
+
+-Make sure code works for AMAs with multiple people
+
+9. Look into deployment. (surge frontend, heroku backend) Environment variables.
+Fix Procfile/package.json/directory structure to suit proper production practices.
+http://stackoverflow.com/questions/14472458/free-mongo-db-hosting-with-heroku
+https://geuispuspita.wordpress.com/2014/06/30/how-to-use-mongohq-on-heroku-without-verifying-your-account/
+http://stackoverflow.com/questions/19265728/does-heroku-restart-nodejs-server-if-application-crashes
+http://stackoverflow.com/questions/5480337/easy-way-to-prevent-heroku-idling
+https://synthetics.newrelic.com/accounts/1571169/monitors/new
+
+10. Have a schedule GET request to Schedule component so that it all loads at once (inefficient?)
+
+Optional features:
+-Clicking on schedule row in submit page automatically chooses the value in the select dropdown
+-Link to a timezone converter for each time in schedule table
+1. Private messaging user when question has been posted or if something went wrong.
+2. Custom AMA handling for AMAs that are not in the AMA schedule and/or in
+different subreddits. The user will provide date w/ timezone, a means of identifying
+the AMA (e.g., name), and the subreddit. User may optionally provide the username
+of the AMAer if it is known. Allow tags, separated by commas, to be added. To make
+it easier to find the thread.
+Implementation:
+-Subreddit choice dropdown: IAmA, Science, other. If "other" is selected, then
+a greyed out input box will become available for the user to type the SR in.
+-AMA name: Populated after subreddit choice selected. User may either choose one of the options
+or an "Other" option (which will be the only option for "other" subreddit). This will allow
+the user to type in the name in another input box, which will be greyed out unless the "not here"
+option is selected.
+-There will also be an optional username section. They user should enter the username
+of the AMAer, but only if he knows it.
+
+
+3. A time offset for posting the question. This will schedule the question to be posted
+a certain amount of time after the thread is found.
+4. Keep track of scheduled jobs in a DB collection. That way, if the server is restarted,
+then it can reschedule jobs. Remove jobs from Db when fulfilled.
+5. Authorization persistence. Once a user has authorized the app, he shouldn't
+have to re-authorize. Just let the him login and send. The server should keep
+track of the user and his tokens in the DB with this feature.
+6. Have a "Credit bot?" checkbox that asks the user if he wants to add a small
+credit to the bot in his comment.
+7. Write a script to check if there is a correlation the time that a question is
+asked relative to the post time of the thread and whether or not the person answers
+the question. Look at success rates (in a given period of time, answered/total questions),
+proportions (in a given period of time, proportion of answered questions to total
+answer questions).
+8. Simple android app
+9. Implement a way to rate-limit. Essentially, check the DB to see if a job for the
+given AMA has already been requested. Add +5 seconds to the time of the most
+recently requested job for that AMA and set the amaTime equal to that. That way,
+we the server makes less than 30 requests per minute
+10. Deletion requests if no longer want to ask the question. Either via PM to bot account
+(simple) or set up an account dashboard that includes the questions asked.
+11. About page
+
+Name ideas:
+-AMA Now
+
+Testing:
+
+Change back amaTime (backend)
+Change back cron (backend)
+Change back subreddit (backend)
+Change back api/server (frontend in submit.js)
+Change back redirect uri (frontend in welcome.js/backend)
+Change back redirect uri in reddit app
+
+<h2>How It Works</h2>
+<p id="desc">
+  The server starts searching for the AMA thread 15 minutes before its scheduled post time
+  (to account for early postings). When the thread is found, the server will make a request
+  on behalf on <em>your</em> account to post your question. Because Reddit restricts the number
+  of API requests you can make per minute, the server has built-in rate-limiting, which may
+  delay your post slightly. Please follow AMA rules and general Rediquette when considering
+  your question.
+</p>
+What Is This?
+AMAs are one of Reddit's most well-known features, drawing some of the most popular
+and powerful figures in the world to answer questions from the Reddit community. However,
+users can't always make the AMAs they're interested in. Furthermore, analysis of nearly 8,000
+answered questions from the top 185 AMA threads of all-time shows that 20% of all answered questions
+were asked within 5 minutes of the thread's submission and 54% within 25 minutes. That's
+a tight window to make! AMA Now is a web application that allows Redditors to schedule questions to be posted to AMAs
+as soon as their threads go live. Users can ask their questions <em>now</em without worrying about scheduling conflicts.

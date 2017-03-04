@@ -1,13 +1,14 @@
 import request from 'request';
 import Schedule from 'node-schedule';
 import Event from './models/event-model';
+import Job from './models/job-model';
 
 //  https://www.reddit.com/api/v1/authorize?client_id=kPpo2pzRIdkrMw&response_type=code&state=randomstring&redirect_uri=http://127.0.0.1:6500/authorize_callback&duration=permanent&scope=submit identity
-const CLIENT_ID = process.env.APP_CLIENT_ID || 'kPpo2pzRIdkrMw'; // TODO: make these env variables
-const CLIENT_SECRET = process.env.APP_CLIENT_SECRET || 'jeUuCI6R2s1O5XfTh5EYvEA-LuM';
-const REDIRECT_URI = process.env.REDIRECT_URI || 'http://amanow.surge.sh/submit'; //'http://127.0.0.1:8080/submit';
-const BOT_USER = process.env.BOT_USER || 'amanowbot';
-const BOT_PASS = process.env.BOT_PASS || '283954';
+const CLIENT_ID = process.env.APP_CLIENT_ID;
+const CLIENT_SECRET = process.env.APP_CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI || 'http://127.0.0.1:8080/submit'; //'http://amanow.surge.sh/submit';
+const BOT_USER = process.env.BOT_USER;
+const BOT_PASS = process.env.BOT_PASS;
 const HOUR_MS = 3600000;
 
 
@@ -56,8 +57,13 @@ export const retrieveToken = (req, res) => {
     console.log(`Event: ${ev}`);
     // Schedule access token retrieval
     const currentTime = Date.now();
+
+    // TODO (optional): Rate-limiting - Check for the Jobs collection to see if the ama has
+    // already been requested. Grab the ama with the most recent date and set the amaTime equal
+    // to two seconds more than the job.date
     const amaTime = new Date(ev.date);
-    //const amaTime = new Date(2017, 2, 1, 1, 30, 0, 0);
+    //const amaTime = new Date(Date.now() + HOUR_MS/60*2);
+    //const amaTime = new Date(2017, 2, 3, 22, 0, 0, 0);
     console.log("Retrieving access token");
     request('https://www.reddit.com/api/v1/access_token', {
       method: 'POST',
@@ -71,18 +77,26 @@ export const retrieveToken = (req, res) => {
         password: CLIENT_SECRET // TODO: make this env variable
       }
     }, (err, response, body) => {
+      const refresh = JSON.parse(body).refresh_token;
       if (amaTime - currentTime > (HOUR_MS)) { // if AMA is much later, schedule a token refresh
         console.log(body);
         console.log("Scheduling to refresh token.");
         Schedule.scheduleJob(amaTime, () => { // TODO: Check if scheduling refresh at amaTime is correct
-          refreshToken(response, body, amaTime, req.body.ama, req.body.question);
+          refreshToken(refresh, amaTime, req.body.ama, req.body.question);
         });
       }
       else { // AMA is within the hour, so schedule to check
         console.log("Scheduling to check posts...");
         console.log(body);
-        getPosts(err, response, body, amaTime, req.body.ama, req.body.question);
+        getPosts(err, response, body, amaTime, req.body.ama, req.body.question, refresh);
       }
+      const job = new Job();
+      job.date = amaTime;
+      job.refresh = refresh;
+      job.ama = req.body.ama;
+      job.question = req.body.question;
+      job.save();
+
       sendConfirmationToUser(body, req.body.ama, req.body.question);
     });
   });
@@ -147,10 +161,10 @@ const pmUser = (user, ama, question) => {
 }
 
 // Refreshes the access token
-const refreshToken = (response, body, amaTime, ama, question) => {
+export const refreshToken = (refresh, amaTime, ama, question) => {
   console.log("Refreshing token...");
   const currentTime = Date.now();
-  const refresh = JSON.parse(body).refresh_token;
+  //const refresh = JSON.parse(body).refresh_token;
   console.log("refresh = " + refresh);
   request('https://www.reddit.com/api/v1/access_token', {
     method: 'POST',
@@ -160,15 +174,15 @@ const refreshToken = (response, body, amaTime, ama, question) => {
     },
     auth: {
       username: CLIENT_ID,
-      password: CLIENT_SECRET // TODO: make this env variable
+      password: CLIENT_SECRET
     }
-  }, (err, response, body) => {
-    getPosts(err, response, body, amaTime, ama, question);
+  }, (err, response, body) => { // TODO: check if need to refresh again in case server restart
+    getPosts(err, response, body, amaTime, ama, question, refresh);
   });
 }
 
 // Gets a target post to comment on
-const getPosts = (err, response, body, amaTime, ama, question) => {
+const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
   if (!err && response.statusCode === 200) {
     const startMin = amaTime.getMinutes();
     const startHour = amaTime.getHours();
@@ -194,7 +208,7 @@ const getPosts = (err, response, body, amaTime, ama, question) => {
           for (let post of posts) { // http://stackoverflow.com/questions/3010840/loop-through-an-array-in-javascript
             if (post.data.title.toUpperCase().includes(ama.toUpperCase()) || post.data.selftext.toUpperCase().includes(ama.toUpperCase())) { // TODO: may not work with multiple people in ama arg..needs to be split
               console.log("Found post!");
-              commentOnPost(err, token, post, question);
+              commentOnPost(err, token, post, question, refresh);
               found = true;
               job.cancel();
               break;
@@ -210,7 +224,7 @@ const getPosts = (err, response, body, amaTime, ama, question) => {
 }
 
 // Helper to comment on target post
-const commentOnPost = (err, token, post, text) => {
+const commentOnPost = (err, token, post, text, refresh) => {
   request('https://oauth.reddit.com/api/comment.json', {
     method: 'POST',
     headers: {
@@ -229,5 +243,8 @@ const commentOnPost = (err, token, post, text) => {
       console.log('Body: ' + body);
       console.log(response.statusCode);
     }
+
+    // Done with Job, so remove from DB
+    Job.findOne({'refresh': refresh}).remove().exec();
   });
 }
