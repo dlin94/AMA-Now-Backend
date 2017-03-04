@@ -190,6 +190,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
     //let cron2 = ''; // be sure to cancel if post found in cron1
     cron = `${startMin}-${startMin + 59}/1 ${startHour} * * *`; // TODO: temp...make it an hour and accommodate for non-0 minute times (i.e., use two crons). Also start five minutes before to accoutn for early threads
 
+    people = ama.split(", ")
     let job = Schedule.scheduleJob(cron, () => {
       const token = JSON.parse(body).access_token;
       request('https://oauth.reddit.com/r/IAmA/new.json', { // TODO: change back to test subreddit for more testing

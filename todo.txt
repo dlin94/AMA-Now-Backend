@@ -16,6 +16,10 @@ server. The confirmation page should have a link back to home page.
 Maybe have a countdown timer column.
 -PM user from amanowbot if the post was not found.
 
+-Ensure finding posts works with multiple people
+-There is a DB bug where not all the AMAs are being added to the DB when the server
+refreshes it
+
 
 5. Fix cron to accommodate different times (and maybe check every 30 seconds for an hour)
 Also change amaTimes to be 15 minutes before scheduled times so that it can account for early postings
@@ -81,6 +85,7 @@ we the server makes less than 30 requests per minute
 10. Deletion requests if no longer want to ask the question. Either via PM to bot account
 (simple) or set up an account dashboard that includes the questions asked.
 11. About page
+12. Encrypting code when sending to server
 
 Name ideas:
 -AMA Now

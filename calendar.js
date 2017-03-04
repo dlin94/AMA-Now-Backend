@@ -13,6 +13,7 @@ const API_KEY = process.env.API_KEY || 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ'
 // from calendar API call.
 // Might need to deal with timezone offsets... Read events reference and this: http://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
 export const getEvents = () => { // TODO: temporary parameter...probably not needed
+  Event.collection.drop();
   const timeMin = (new Date()).toISOString();
   request(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${timeMin}`, {
     method: 'GET'
@@ -49,7 +50,6 @@ export const getEvents = () => { // TODO: temporary parameter...probably not nee
           }
         });
       }
-      Event.collection.drop(); // TODO: Make sure this ONLY drops the collection and not the database
     }
   });
 }
