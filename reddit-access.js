@@ -95,7 +95,7 @@ export const retrieveToken = (req, res) => {
       job.refresh = refresh;
       job.ama = req.body.ama;
       job.question = req.body.question;
-      job.save();
+      // job.save();
 
       sendConfirmationToUser(body, req.body.ama, req.body.question);
     });
@@ -203,16 +203,20 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
         if (err) {
           console.log("Get post err: " + err);
         } else {
-          //console.log(body);
           let found = false;
           const posts = JSON.parse(body).data.children;
           for (let post of posts) { // http://stackoverflow.com/questions/3010840/loop-through-an-array-in-javascript
-            if (post.data.title.toUpperCase().includes(ama.toUpperCase()) || post.data.selftext.toUpperCase().includes(ama.toUpperCase())) { // TODO: may not work with multiple people in ama arg..needs to be split
-              console.log("Found post!");
-              commentOnPost(err, token, post, question, refresh);
-              found = true;
-              job.cancel();
-              break;
+            for (let person of ama.split(", ")) {
+              if (post.data.title.toupperCase().includes(person.toUpperCase()) ||
+                  post.data.selftext.toUpperCase().includes(person.toUpperCase())) {
+                console.log("Found post!");
+                commentOnPost(err, token, post, question, refresh);
+                found = true;
+                job.cancel();
+                break;
+              }
+              if (found)
+                break;
             }
           }
           if (!found) {
@@ -225,7 +229,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
 }
 
 // Helper to comment on target post
-const commentOnPost = (err, token, post, text, refresh) => {
+const commentOnPost = (token, post, text, refresh) => {
   request('https://oauth.reddit.com/api/comment.json', {
     method: 'POST',
     headers: {
