@@ -61,8 +61,8 @@ export const retrieveToken = (req, res) => {
     // TODO (optional): Rate-limiting - Check for the Jobs collection to see if the ama has
     // already been requested. Grab the ama with the most recent date and set the amaTime equal
     // to two seconds more than the job.date
-    const amaTime = new Date(ev.date);
-    //const amaTime = new Date(Date.now() + HOUR_MS/60*2);
+    //const amaTime = new Date(ev.date);
+    const amaTime = new Date(Date.now() + HOUR_MS/60*2);
     //const amaTime = new Date(2017, 2, 3, 22, 0, 0, 0);
     console.log("Retrieving access token");
     request('https://www.reddit.com/api/v1/access_token', {
@@ -188,7 +188,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
     const startHour = amaTime.getHours();
     let cron = '';
     //let cron2 = ''; // be sure to cancel if post found in cron1
-    cron = `${startMin}-${startMin + 59}/1 ${startHour} * * *`; // TODO: temp...make it an hour and accommodate for non-0 minute times (i.e., use two crons). Also start five minutes before to accoutn for early threads
+    cron = `${startMin}-${startMin + 1}/1 ${startHour} * * *`; // TODO: temp...make it an hour and accommodate for non-0 minute times (i.e., use two crons). Also start five minutes before to accoutn for early threads
 
     people = ama.split(", ")
     let job = Schedule.scheduleJob(cron, () => {
