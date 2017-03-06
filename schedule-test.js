@@ -1,8 +1,21 @@
 import Schedule from 'node-schedule';
 
-for (let i = 0; i <= 59; i++) {
-  const date = new Date(2017, 1, 26, 15, 0, i);
+const f = () => {
+  let found = false;
+
+  let date = new Date(Date.now() + 2000);
   Schedule.scheduleJob(date, () => {
-    console.log("Second: " + i);
+    console.log("Hello from job 1!");
+    found = true;
   });
+
+  date = new Date(Date.now() + 5000);
+  let job2 = Schedule.scheduleJob(date, () => {
+    if (!found) // should not execute if found was changed to true in job 1
+      console.log("Hello from job 2!");
+  });
+
+  console.log("Hello from end of function!") // should execute first
 }
+
+f();
