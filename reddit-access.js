@@ -95,7 +95,7 @@ export const retrieveToken = (req, res) => {
       job.refresh = refresh;
       job.ama = req.body.ama;
       job.question = req.body.question;
-      // job.save();
+      //job.save();
 
       sendConfirmationToUser(body, req.body.ama, req.body.question);
     });
@@ -206,7 +206,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
           const posts = JSON.parse(body).data.children;
           for (let post of posts) { // http://stackoverflow.com/questions/3010840/loop-through-an-array-in-javascript
             for (let person of ama.split(", ")) {
-              if (post.data.title.toupperCase().includes(person.toUpperCase()) ||
+              if (post.data.title.toUpperCase().includes(person.toUpperCase()) ||
                   post.data.selftext.toUpperCase().includes(person.toUpperCase())) {
                 console.log("Found post!");
                 commentOnPost(err, token, post, question, refresh);
