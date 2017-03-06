@@ -22,7 +22,8 @@ app.use(express.static('public'));
 app.use('/api', router);
 
 app.get('/', (req, res) => {
-  res.render('index');
+  //res.render('index.html');
+  res.send('');
 });
 
 const port = process.env.PORT || 6500;
