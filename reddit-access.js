@@ -192,7 +192,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
 
     let job = Schedule.scheduleJob(cron, () => {
       const token = JSON.parse(body).access_token;
-      request('https://oauth.reddit.com/r/IAmA/new.json', { // TODO: change back to test subreddit for more testing
+      request('https://oauth.reddit.com/r/testerstuffasdf/new.json', { // TODO: change back to test subreddit for more testing
         method: 'GET',
         headers: {
           'Authorization': 'bearer' + token, // for some reason, this endpoint doesn't require a space after 'bearer'
