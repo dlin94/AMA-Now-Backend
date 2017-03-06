@@ -209,7 +209,7 @@ const getPosts = (err, response, body, amaTime, ama, question, refresh) => {
               if (post.data.title.toUpperCase().includes(person.toUpperCase()) ||
                   post.data.selftext.toUpperCase().includes(person.toUpperCase())) {
                 console.log("Found post!");
-                commentOnPost(err, token, post, question, refresh);
+                commentOnPost(token, post, question, refresh);
                 found = true;
                 job.cancel();
                 break;
