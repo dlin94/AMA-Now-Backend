@@ -85,16 +85,17 @@ we the server makes less than 30 requests per minute
 10. Deletion requests if no longer want to ask the question. Either via PM to bot account
 (simple) or set up an account dashboard that includes the questions asked.
 11. About page
-12. Encrypting code when sending to server
-
-Name ideas:
--AMA Now
+12. Refactor code to use axios. Use a separate file. See the second answer here for
+reason why promises may be superior to nested callbacks: https://www.quora.com/Whats-the-difference-between-a-promise-and-a-callback-in-Javascript
+13.  Rate-limiting - Check for the Jobs collection to see if the ama has
+already been requested. Grab the ama with the most recent date and set the amaTime equal
+to two seconds more than the job.date
 
 Testing:
 
 Change back amaTime (backend)
 Change back cron (backend)
-Change back subreddit (backend)
+Change back subreddit (backend, multiple instances)
 Change back api/server (frontend in submit.js)
 Change back redirect uri (frontend in welcome.js/backend)
 Change back redirect uri in reddit app
@@ -116,3 +117,15 @@ answered questions from the top 185 AMA threads of all-time shows that 20% of al
 were asked within 5 minutes of the thread's submission and 54% within 25 minutes. That's
 a tight window to make! AMA Now is a web application that allows Redditors to schedule questions to be posted to AMAs
 as soon as their threads go live. Users can ask their questions <em>now</em without worrying about scheduling conflicts.
+
+Useful links:
+
+Cron jobs:
+http://stackoverflow.com/questions/16094545/cron-job-every-5-minutes-starting-from-a-specific-time
+http://stackoverflow.com/questions/30055595/starting-a-cron-job-at-30-minutes-in-unix?rq=1
+
+Looping in JS:
+http://stackoverflow.com/questions/3010840/loop-through-an-array-in-javascript
+
+Mod behavior with negatives:
+http://stackoverflow.com/questions/4467539/javascript-modulo-not-behaving

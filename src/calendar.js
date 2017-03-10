@@ -2,17 +2,20 @@ import request from 'request';
 import Event from './models/event-model';
 import Job from './models/job-model';
 
-const CALENDAR_ID = process.env.CALENDAR_ID || 'amaverify@gmail.com'
-const API_KEY = process.env.API_KEY || 'AIzaSyA2yG721085RrJDXnQwTAu6j0dcMU6EvTQ';
+const CALENDAR_ID = process.env.CALENDAR_ID || 'amaverify@gmail.com';
+const API_KEY = process.env.CALENDAR_API_KEY;
 
-// https://calendar.google.com/calendar/embed?src=amaverify@gmail.com
-// https://developers.google.com/google-apps/calendar/v3/reference/events/list
+/******************************************************************************/
+//
+// Public functions
+//
+/******************************************************************************/
 
-// TODO: Should be scheduled for once a day; may need to store in DB, and events should be removed accordingly on update
-// DB should be updated once a day. Just drop the DB and repopulate it with data
-// from calendar API call.
-// Might need to deal with timezone offsets... Read events reference and this: http://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
-export const getEvents = () => { // TODO: temporary parameter...probably not needed
+/*
+* Makes a GET request to Google Calendars API to get the AMA schedule. Saves the
+* events in the database.
+*/
+export const getEvents = () => {
   Event.collection.drop();
   const timeMin = (new Date()).toISOString();
   request(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${timeMin}`, {
@@ -21,12 +24,7 @@ export const getEvents = () => { // TODO: temporary parameter...probably not nee
     if (err) {
       console.log("Error: " + err);
     } else {
-      //console.log(body);
       const events = JSON.parse(body).items;
-      //console.log(events);
-      //console.log(events);
-      //console.log(events.length);
-      //console.log(response.statusCode);
       for (let e of events) {
         const subjects = getSubjects(e.summary);
         Event.find({'people': subjects}).exec((err, ev) => {
@@ -39,7 +37,7 @@ export const getEvents = () => { // TODO: temporary parameter...probably not nee
               const event = new Event();
               event.date = e.start.dateTime;
               event.people = subjects;
-              event.save() // TODO: only save if not already in database
+              event.save()
               .then(result => {
                 //console.log("Result: " + result);
               })
@@ -54,6 +52,9 @@ export const getEvents = () => { // TODO: temporary parameter...probably not nee
   });
 }
 
+/*
+* Retrieves all the events in the database.
+*/
 export const getSchedule = (req, res) => {
   Event.find().select('people date -_id').exec((err, ev) => {
     if (err) {
@@ -65,9 +66,18 @@ export const getSchedule = (req, res) => {
   })
 }
 
+
+/******************************************************************************/
+//
+// Helper functions
+//
+/******************************************************************************/
+
+/*
+* Helper to parse calendar data.
+*/
 const getSubjects = (summary) => {
   let subjects = null;
-  //let summArray = null;
   if (summary.startsWith("[")) { // remove brackets
     const n = summary.indexOf("]")
     summary = summary.slice(1,n);
@@ -88,7 +98,3 @@ const getSubjects = (summary) => {
   }
   return subjects;
 }
-
-//const convertToUTC = (dateString) => {
-//  return dateString.slice(0, -6) + 'Z';
-//}

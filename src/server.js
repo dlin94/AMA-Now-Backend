@@ -22,12 +22,12 @@ app.use(express.static('public'));
 app.use('/api', router);
 
 app.get('/', (req, res) => {
-  //res.render('index.html');
   res.send('');
 });
 
 const port = process.env.PORT || 6500;
 app.listen(port, () => {
+  // Update the database every hour
   const date = new Date();
   const cron = `${date.getSeconds()} ${date.getMinutes()} * * * *`
   Schedule.scheduleJob(cron, getEvents);
